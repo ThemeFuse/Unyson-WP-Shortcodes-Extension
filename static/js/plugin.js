@@ -29,7 +29,6 @@
 
 	function shortcodesHtmlFor (editor) {
 		var shortcodes = shortcodesListFor(editor);
-		// console.log(shortcodes);
 
 		return _.map(
 			shortcodes,
@@ -47,7 +46,6 @@
 		}
 
 		function singleShortcodeHtml (shortcode) {
-			console.log(shortcode);
 			var iconHtml = null;
 
 			if (shortcode.icon) {
