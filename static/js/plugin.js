@@ -8,7 +8,7 @@
 	////////////
 
 	function initPlugin (editor) {
-		console.log("init", editor);
+		window.myEditor = editor;
 
 		editor.addButton('unyson_shortcodes', {
 			type: 'panelbutton',
@@ -30,10 +30,12 @@
 						return false;
 					}
 
-					console.log(tag);
-
 					if (tag) {
-						tinyMCE.activeEditor.execCommand("insertShortcode", false, {tag: tag});
+						tinyMCE.activeEditor.execCommand(
+							"insertShortcode",
+							false,
+							{tag: tag}
+						);
 					}
 
 					this.hide();
@@ -44,20 +46,7 @@
 		});
 
 		editor.addCommand('insertShortcode', function (ui, params) {
-			var node,
-				p,
-				content = getVisualElementHtml(params.tag);
-
-			console.log(content);
-
-			if (node = editor.dom.getParent(editor.selection.getNode())) {
-				p = editor.dom.create('p');
-				editor.dom.insertAfter(p, node);
-				editor.selection.setCursorLocation(p, 0);
-				editor.nodeChanged();
-			}
-
-			editor.execCommand("mceInsertContent", false, content);
+			insertShortcode(editor, params.tag);
 		});
 
 		//disable drag&drop in firefox
@@ -68,26 +57,189 @@
 			}
 		});
 
-		//replace tags with html block
-		editor.on('BeforeSetContent', function (event) {
-			console.log("do an actual visual element replace");
-			return;
-			if (event.content.match(tag_regex)) {
-				event.content = _self.getHTML(event.content);
+		//add listners for content item
+		editor.on('click', function (e) {
+			var currentElement = e.target;
+
+			//delete item
+			if ($(currentElement).hasClass('fw-item-delete')) {
+				removeShortcodeFor(
+					$(currentElement).closest('.fw-shortcode'),
+					editor
+				);
+
+				return false;
+			}
+
+			//clone item
+			if ($(currentElement).hasClass('fw-item-clone')) {
+				duplicateShortcodeFor(
+					$(currentElement).closest('[data-fw-shortcode-tag]'),
+					editor
+				);
+
+				return false;
+			}
+
+			//default is edit item
+			if ($(currentElement).hasClass('fw-shortcode')) {
+				editShortcodeFor(
+					$(currentElement),
+					editor
+				);
+			} else if ($(currentElement).parents('[data-fw-shortcode-tag]').length) {
+				editShortcodeFor(
+					$(currentElement).closest('[data-fw-shortcode-tag]'),
+					editor
+				)
 			}
 		});
+
+		var replaceTagsWithHtml = _.partial(performReplacement, replaceTagWithHtml);
+		var replaceTagsWithHtmlAndInitialize = _.partial(
+			performReplacement,
+			_.compose(
+				replaceTagWithHtml,
+				initializeTag
+			)
+		);
+
+		editor.on('BeforeSetContent', function (event) {
+			if (! editor.fwEditorShortcodesStorage) {
+				event.content = replaceTagsWithHtmlAndInitialize(event.content);
+				return;
+			}
+
+			event.content = replaceTagsWithHtml(event.content)
+		});
+
+		function replaceTagWithHtml (shortcode) {
+			var data = dataFor(shortcode.tag);
+			var values = fwShortcodesAggressiveCoder.decode(shortcode.attrs.named);
+			var id = values.__fw_editor_shortcodes_id;
+
+			if (! fwShortcodesAggressiveCoder.canDecode(shortcode.attrs.named)) {
+				return false;
+			}
+
+			return getVisualElementHtml(data.tag, id);
+		}
+
+		function initializeTag (shortcode) {
+			var data = dataFor(shortcode.tag);
+			var values = fwShortcodesAggressiveCoder.decode(shortcode.attrs.named);
+			var id = values.__fw_editor_shortcodes_id;
+
+			if (! fwShortcodesAggressiveCoder.canDecode(shortcode.attrs.named)) {
+				if (values.fw_shortcode_id) {
+					return renderDeprecatedSyntax(shortcode.tag, values.fw_shortcode_id);
+				}
+
+				return shortcode;
+			}
+
+			initializeShortcodeStorage(editor, data.tag, id, values);
+
+			return shortcode;
+		}
+
+		function renderDeprecatedSyntax (tag, fw_id) {
+			var deprecatedData = JSON.parse(
+				jQuery('#fw-shortcode-settings').val()
+			);
+
+			var id = fw.randomMD5();
+
+			try {
+				var values = deprecatedData[tag][fw_id];
+			} catch(err) {
+				/**
+				 * Get actual defaults if there's no value in storage
+				 */
+				var values = null;
+			}
+
+			values.__fw_editor_shortcodes_id = id;
+
+			/**
+			 * Adhere to the convetion of coders.
+			 * Very important.
+			 */
+			values._fw_coder = 'aggressive';
+
+			initializeShortcodeStorage(editor, tag, id, values);
+
+			return {
+				tag: tag,
+				attrs: {
+					named: values
+				}
+			};
+		}
 
 		//replace all html content with tags
 		editor.on('PostProcess', function (event) {
-			console.log("restore tags back");
-			return;
 			if (event.get) {
-				event.content = _self.getTags(event.content);
+				event.content = replaceHtmlWithTags(editor, event.content);
+				// console.log(event.content);
 			}
 		});
+
+		function performReplacement (callback, content) {
+			return _.reduce(
+				fw_ext_editor_shortcodes_v2_data.shortcodes,
+				function (currentContent, shortcode) {
+					return wp.shortcode.replace(
+						shortcode.tag,
+						currentContent,
+						callback
+					);
+				},
+				content
+			);
+		}
 	}
 
-	function getVisualElementHtml (tag) {
+	function replaceHtmlWithTags (editor, content) {
+		var $content = jQuery(
+			'<div class="fw-replace-temporary-tag">' + content + '</div>'
+		);
+
+		if ($content.find('.fw-shortcode').length == 0) {
+			return content;
+		}
+
+		_.map(
+			$content.find('.fw-shortcode').toArray(),
+			replaceShortcodeWithTag
+		);
+
+		function replaceShortcodeWithTag (shortcode) {
+			var id = $(shortcode).attr('data-fw-shortcode-id');
+			getStorageFor(editor);
+
+			$(shortcode).parent().replaceWith(
+				formShortcodeTagFor(id, editor)
+			);
+		}
+
+		return $content.html();
+	}
+
+	function formShortcodeTagFor (id, editor) {
+		var data = getStorageFor(editor).get(id);
+		if (! data) return;
+		var encoded = fwShortcodesAggressiveCoder.encode(data.modal.get('values'));
+		encoded['__fw_editor_shortcodes_id'] = id;
+		var encodedString = _.map(
+			encoded,
+			function (value, key) { return key + '="' + value + '"'; }
+		).join(' ');
+
+		return '[' + data.tag + ' ' + encodedString + ']' + '[/' + data.tag + ']';
+	}
+
+	function getVisualElementHtml (tag, id) {
 		var shortcode = dataFor(tag);
 
 		var icon = getShortcodeIcon(tag);
@@ -103,7 +255,7 @@
 		icon = icon.html();
 
 		return '' +
-			'<span data-shortcode-tag="' + tag + '" class="mceNonEditable mceItem fw-shortcode unselectable" contenteditable="false">' +
+			'<p><span data-fw-shortcode-id="' + id + '" data-fw-shortcode-tag="' + tag + '" class="mceNonEditable mceItem fw-shortcode unselectable" contenteditable="false">' +
 				'<span class="mceItem fw-component-bar mceNonEditable unselectable" contenteditable="false">' +
 					icon +
 					'<span class="mceItem mceNonEditable unselectable" contenteditable="false">' + shortcode.title + '</span>' +
@@ -114,7 +266,7 @@
 					'</span>' +
 					'<span class="mceItem mceNonEditable fw-component-title unselectable fw-hide" style="display: none">3Nd0fL1N3Sh0rtC0d3</span>' +
 				'</span>' +
-			'</span>';
+			'</span></p>';
 	}
 
 	function shortcodesHtmlFor (editor) {
@@ -200,6 +352,91 @@
 			fw_ext_editor_shortcodes_v2_data.shortcodes,
 			{tag: shortcode}
 		);
+	}
+
+	function removeShortcodeFor ($container, editor) {
+		var id = $container.attr('data-fw-shortcode-id');
+
+		$container.remove();
+		getStorageFor(editor).remove(id);
+	}
+
+	function editShortcodeFor ($container, editor) {
+		var id = $container.attr('data-fw-shortcode-id');
+		getStorageFor(editor).get(id).modal.open();
+	}
+
+	function duplicateShortcodeFor ($container, editor) {
+		// TODO: change cursor position ??
+		var tag = $container.attr('data-fw-shortcode-tag');
+		var id = $container.attr('data-fw-shortcode-id');
+
+		var newId = fw.randomMD5();
+
+		getStorageFor(editor).add(
+			newId,
+			getStorageFor(editor).get(id)
+		);
+
+		insertShortcode(editor, tag, newId);
+	}
+
+	function insertShortcode (editor, tag, id) {
+		var id = id || fw.randomMD5();
+
+		var content = getVisualElementHtml(tag, id);
+		editor.execCommand("mceInsertContent", false, content);
+
+		initializeShortcodeStorage(editor, tag, id);
+	}
+
+	function initializeShortcodeStorage (editor, tag, id, values) {
+		if (getStorageFor(editor).get(id)) { return; }
+
+		var modal = new fw.OptionsModal({
+			options: dataFor(tag).options
+		});
+
+		if (values) {
+			modal.set('values', values);
+		} else {
+			modal.getActualValues().then(function (response) {
+				modal.set('values', response.data.values);
+			});
+		}
+
+		var shortcodeData = {
+			tag: tag,
+			modal: modal,
+			id: id
+		};
+
+		getStorageFor(editor).add(id, shortcodeData);
+	}
+
+	function getStorageFor (editor) {
+		editor.fwEditorShortcodesStorage = editor.fwEditorShortcodesStorage || {};
+
+		return {
+			add: add,
+			remove: remove,
+			get: get
+		};
+
+		function get(id) {
+			return editor.fwEditorShortcodesStorage[id];
+		}
+
+		function add (id, data) {
+			editor.fwEditorShortcodesStorage[id] = data;
+		}
+
+		function remove (id) {
+			editor.fwEditorShortcodesStorage = _.omit(
+				editor.fwEditorShortcodesStorage,
+				id
+			);
+		}
 	}
 })(jQuery);
 
