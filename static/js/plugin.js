@@ -109,7 +109,7 @@
 			 * This function will initialze editor storage and also it should
 			 * render first HTML.
 			 */
-			if (! editor.fwEditorShortcodesStorage) {
+			if (! window.fwEditorShortcodesStorage) {
 				event.content = replaceTagsWithHtmlAndInitialize(event.content);
 				return;
 			}
@@ -419,7 +419,7 @@
 	}
 
 	function getStorageFor (editor) {
-		editor.fwEditorShortcodesStorage = editor.fwEditorShortcodesStorage || {};
+		window.fwEditorShortcodesStorage = window.fwEditorShortcodesStorage || {};
 
 		return {
 			add: add,
@@ -428,16 +428,16 @@
 		};
 
 		function get(id) {
-			return editor.fwEditorShortcodesStorage[id];
+			return window.fwEditorShortcodesStorage[id];
 		}
 
 		function add (id, data) {
-			editor.fwEditorShortcodesStorage[id] = data;
+			window.fwEditorShortcodesStorage[id] = data;
 		}
 
 		function remove (id) {
-			editor.fwEditorShortcodesStorage = _.omit(
-				editor.fwEditorShortcodesStorage,
+			window.fwEditorShortcodesStorage = _.omit(
+				window.fwEditorShortcodesStorage,
 				id
 			);
 		}
