@@ -103,6 +103,12 @@
 		);
 
 		editor.on('BeforeSetContent', function (event) {
+			/**
+			 * That's actually happening just on the first page load.
+			 *
+			 * This function will initialze editor storage and also it should
+			 * render first HTML.
+			 */
 			if (! editor.fwEditorShortcodesStorage) {
 				event.content = replaceTagsWithHtmlAndInitialize(event.content);
 				return;
