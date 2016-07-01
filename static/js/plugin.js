@@ -8,8 +8,6 @@
 	////////////
 
 	function initPlugin (editor) {
-		window.myEditor = editor;
-
 		editor.addButton('unyson_shortcodes', {
 			type: 'panelbutton',
 			icon: 'fw-shortcodes-button',
