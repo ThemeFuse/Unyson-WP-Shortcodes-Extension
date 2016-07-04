@@ -51,6 +51,7 @@ class FW_Extension_Editor_Shortcodes_V2 extends FW_Extension {
 		}
 
 		$result['options'] = $shortcode->get_options();
+		$result['config'] = $shortcode->get_config();
 		$result['tag'] = $shortcode->get_tag();
 
 		$title = $shortcode->get_config('page_builder/title');

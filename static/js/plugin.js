@@ -352,10 +352,24 @@
 	}
 
 	function dataFor (shortcode) {
-		return _.findWhere(
-			fw_ext_editor_shortcodes_v2_data.shortcodes,
-			{tag: shortcode}
+
+		var toReturn = $.extend(
+			true,
+			{},
+			{
+				config: {
+					page_builder: {
+						popup_size: 'small'
+					}
+				}
+			},
+			_.findWhere(
+				fw_ext_editor_shortcodes_v2_data.shortcodes,
+				{tag: shortcode}
+			)
 		);
+
+		return toReturn;
 	}
 
 	function removeShortcodeFor ($container, editor) {
@@ -398,7 +412,8 @@
 		if (getStorageFor(editor).get(id)) { return; }
 
 		var modal = new fw.OptionsModal({
-			options: dataFor(tag).options
+			options: dataFor(tag).options,
+			size: dataFor(tag).config.page_builder.popup_size
 		});
 
 		if (values) {
@@ -441,6 +456,16 @@
 				id
 			);
 		}
+	}
+
+	function deepObjectExtend(target, source) {
+		for (var prop in source)
+			if (prop in target)
+				deepObjectExtend(target[prop], source[prop]);
+			else
+				target[prop] = source[prop];
+
+		return target;
 	}
 })(jQuery);
 
