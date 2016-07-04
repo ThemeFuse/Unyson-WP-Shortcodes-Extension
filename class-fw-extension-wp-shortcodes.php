@@ -20,7 +20,7 @@ class FW_Extension_Editor_Shortcodes_V2 extends FW_Extension {
 			 * default post editor and all of the wp-editors.
 			 */
 			$this->default_shortcodes_list = apply_filters(
-				'fw:ext:editor-shortcodes-v2:default-shortcodes',
+				'fw:ext:wp-shortcodes:default-shortcodes',
 				array(
 					'button', 'map', 'icon', 'divider', 'notification'
 				)

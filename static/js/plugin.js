@@ -40,7 +40,7 @@
 				}
 			},
 			onclick: fixPanelPosition,
-			tooltip: fw_ext_editor_shortcodes_v2_data.button_title
+			tooltip: fw_ext_wp_shortcodes_data.button_title
 		});
 
 		editor.addCommand('insertShortcode', function (ui, params) {
@@ -191,7 +191,7 @@
 
 		function performReplacement (callback, content) {
 			return _.reduce(
-				fw_ext_editor_shortcodes_v2_data.shortcodes,
+				fw_ext_wp_shortcodes_data.shortcodes,
 				function (currentContent, shortcode) {
 					return wp.shortcode.replace(
 						shortcode.tag,
@@ -348,7 +348,7 @@
 			return JSON.parse($wpEditor.attr('data-fw-shortcodes-list'));
 		}
 
-		return fw_ext_editor_shortcodes_v2_data.default_shortcodes_list;
+		return fw_ext_wp_shortcodes_data.default_shortcodes_list;
 	}
 
 	function dataFor (shortcode) {
@@ -364,7 +364,7 @@
 				}
 			},
 			_.findWhere(
-				fw_ext_editor_shortcodes_v2_data.shortcodes,
+				fw_ext_wp_shortcodes_data.shortcodes,
 				{tag: shortcode}
 			)
 		);

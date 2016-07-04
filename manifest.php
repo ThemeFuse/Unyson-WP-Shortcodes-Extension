@@ -3,9 +3,9 @@
 if (! defined('FW')) { die('Forbidden'); }
 
 $manifest = array(
-	'name' => __('Editor Shortcodes V2', 'fw'),
+	'name' => __('WP Shortcodes', 'fw'),
 	'description' => __(
-		'Lets you insert shortcodes inside any wp-editor option type',
+		'Lets you insert Unyson shortcodes inside any wp-editor',
 		'fw'
 	),
 	'display' => false,
