@@ -2,7 +2,7 @@
 
 if (! defined('FW')) { die('Forbidden'); }
 
-class FW_Extension_Editor_Shortcodes_V2 extends FW_Extension {
+class FW_Extension_WP_Shortcodes extends FW_Extension {
 	protected $default_shortcodes_list = null;
 
 	protected function _init() {

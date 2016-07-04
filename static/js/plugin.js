@@ -8,6 +8,15 @@
 	////////////
 
 	function initPlugin (editor) {
+		var html = shortcodesHtmlFor(editor);
+
+		/**
+		 * Skip initialization if we don't have any HTML for this current editor
+		 */
+		if (! html) {
+			return;
+		}
+
 		editor.addButton('unyson_shortcodes', {
 			type: 'panelbutton',
 			icon: 'fw-shortcodes-button',
@@ -16,7 +25,7 @@
 				role: 'application',
 				classes: 'fw-shortcodes-container',
 				autohide: true,
-				html: shortcodesHtmlFor(editor),
+				html: html,
 				onclick: function (e) {
 					var tag;
 
@@ -276,6 +285,8 @@
 	function shortcodesHtmlFor (editor) {
 		var shortcodes = shortcodesListFor(editor);
 
+		if (! shortcodes) { return; }
+
 		return _.map(
 			shortcodes,
 			_.compose(
@@ -345,7 +356,11 @@
 		var isWpEditor = $wpEditor.length > 0;
 
 		if (isWpEditor) {
-			return JSON.parse($wpEditor.attr('data-fw-shortcodes-list'));
+			if ($wpEditor.attr('data-fw-shortcodes-list')) {
+				return JSON.parse($wpEditor.attr('data-fw-shortcodes-list'));
+			}
+
+			return false;
 		}
 
 		return fw_ext_wp_shortcodes_data.default_shortcodes_list;

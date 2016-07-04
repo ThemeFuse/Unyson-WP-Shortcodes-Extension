@@ -3,12 +3,28 @@
 if (! defined('FW')) { die('Forbidden'); }
 
 $manifest = array(
-	'name' => __('WP Shortcodes', 'fw'),
+	'name' => __('WordPress Shortcodes', 'fw'),
 	'description' => __(
-		'Lets you insert Unyson shortcodes inside any wp-editor',
+		'Lets you insert Unyson shortcodes inside any WordPress editor.',
 		'fw'
 	),
-	'display' => false,
-	'standalone' => true
+	'version' => '1.0.0',
+	'display' => true,
+	'standalone' => true,
+
+	'requirements' => array(
+		'framework' => array(
+			/**
+			* In that version was solved the bug with children extension requirements when activate an extension
+			*/
+			'min_version' => '2.1.18',
+		),
+
+		'extensions' => array(
+			'shortcodes' => array(
+				'min_version' => '1.3.17'
+			)
+		)
+	)
 );
 
