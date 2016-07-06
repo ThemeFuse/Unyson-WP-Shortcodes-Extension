@@ -15,16 +15,19 @@ class FW_Extension_WP_Shortcodes extends FW_Extension {
 
 	public function default_shortcodes_list() {
 		if (! $this->default_shortcodes_list) {
+			$shortcodes = fw_ext('shortcodes')->get_shortcodes();
+
 			/**
 			 * Filter default shortcodes list that will be displayed in
 			 * default post editor and all of the wp-editors.
 			 */
-			$this->default_shortcodes_list = apply_filters(
+			$this->default_shortcodes_list = array_diff(apply_filters(
 				'fw:ext:wp-shortcodes:default-shortcodes',
-				array(
-					'button', 'map', 'icon', 'divider', 'notification'
-				)
-			);
+				array_diff(array_keys($shortcodes), array('column', 'section', 'row'))
+			), array(
+				'section', 'column', 'row'
+			));
+
 		}
 
 		return $this->default_shortcodes_list;
