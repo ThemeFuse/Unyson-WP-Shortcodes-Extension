@@ -405,11 +405,19 @@
 		var id = $container.attr('data-fw-shortcode-id');
 
 		var newId = fw.randomMD5();
+		var oldData = getStorageFor(editor).get(id)
 
-		getStorageFor(editor).add(
-			newId,
-			getStorageFor(editor).get(id)
-		);
+		var modal = new fw.OptionsModal({
+			options: oldData.modal.get('options'),
+			size: oldData.modal.get('size'),
+			values: oldData.modal.get('values')
+		});
+
+		getStorageFor(editor).add(newId, {
+			tag: oldData.tag,
+			id: newId,
+			modal: modal
+		});
 
 		insertShortcode(editor, tag, newId);
 	}
