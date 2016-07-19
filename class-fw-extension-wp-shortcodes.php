@@ -57,6 +57,13 @@ class FW_Extension_WP_Shortcodes extends FW_Extension {
 		$result['config'] = $shortcode->get_config();
 		$result['tag'] = $shortcode->get_tag();
 
+		if ($result['options']) {
+			$result['default_values'] = fw_get_options_values_from_input(
+				$result['options'],
+				array()
+			);
+		}
+
 		$title = $shortcode->get_config('page_builder/title');
 		$result['title'] = $title ? $title : $result['tag'];
 
@@ -81,6 +88,10 @@ class FW_Extension_WP_Shortcodes extends FW_Extension {
 	}
 
 	protected function add_frontend_hooks() {
+		add_action(
+			'fw_ext_shortcodes:after_shortcode_enqueue_static',
+			array($this, 'enqueue_wp_shortcode_static')
+		);
 	}
 
 	public function add_unyson_plugin($plugins) {
@@ -104,5 +115,46 @@ class FW_Extension_WP_Shortcodes extends FW_Extension {
 
 		return $mce_css;
 	}
+
+	public function enqueue_wp_shortcode_static($shortcode) {
+		/**
+		 * Try to enqueue static for shortcodes that may be in
+		 * some attribute for a Page Builder Shortcode.
+		 */
+
+		if ($this->have_to_decode_with_aggresive($shortcode[3])) {
+			$atts = shortcode_parse_atts($shortcode[3]);
+
+			// 1. first decode with JSON coder
+			$atts = fw_ext('shortcodes')->get_attr_coder('json')->decode(
+				$atts, '', null
+			);
+
+			// 2. decode with aggressive, but only if we need it
+			foreach ($atts as $key => $value) {
+				if (! $this->have_to_decode_with_aggresive($value)) {
+					continue;
+				}
+
+				// 3. Enqueue
+				fw_ext_shortcodes_enqueue_shortcodes_static(
+					$value
+				);
+			}
+		}
+
+	}
+
+	private function have_to_decode_with_aggresive($str) {
+		$has_coder_inside = strpos($str, '_fw_coder=') !== false;
+		$has_aggessive_coder = strpos($str, 'aggressive') !== false;
+		$has_wp_editor_shortcode = strpos(
+			$str,
+			'__fw_editor_shortcodes_id'
+		) !== false;
+
+		return $has_coder_inside && $has_aggessive_coder && $has_wp_editor_shortcode;
+	}
+
 }
 

@@ -118,12 +118,8 @@
 			 * This function will initialze editor storage and also it should
 			 * render first HTML.
 			 */
-			if (! window.fwEditorShortcodesStorage) {
-				event.content = replaceTagsWithHtmlAndInitialize(event.content);
-				return;
-			}
 
-			event.content = replaceTagsWithHtml(event.content)
+			event.content = replaceTagsWithHtmlAndInitialize(event.content);
 		});
 
 		function replaceTagWithHtml (shortcode) {
@@ -437,7 +433,8 @@
 
 		var modal = new fw.OptionsModal({
 			options: dataFor(tag).options,
-			size: dataFor(tag).config.page_builder.popup_size
+			size: dataFor(tag).config.page_builder.popup_size,
+			values: dataFor(tag).default_values
 		});
 
 		if (values) {
