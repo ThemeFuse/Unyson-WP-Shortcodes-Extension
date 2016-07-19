@@ -418,8 +418,9 @@
 		});
 
 		modal.on('change:values', function () {
+			editor.fire('PostProcess');
 			editor.fire('change');
-		})
+		});
 
 		getStorageFor(editor).add(newId, {
 			tag: oldData.tag,
@@ -455,6 +456,7 @@
 		var modal = new fw.OptionsModal(options);
 
 		modal.on('change:values', function () {
+			editor.fire('PostProcess');
 			editor.fire('change');
 		});
 
