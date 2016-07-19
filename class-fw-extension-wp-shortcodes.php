@@ -117,12 +117,10 @@ class FW_Extension_WP_Shortcodes extends FW_Extension {
 	}
 
 	public function enqueue_wp_shortcode_static($shortcode) {
-        return;
 		/**
 		 * Try to enqueue static for shortcodes that may be in
 		 * some attribute for a Page Builder Shortcode.
 		 */
-
 		if ($this->have_to_decode_with_aggresive($shortcode[3])) {
 			$atts = shortcode_parse_atts($shortcode[3]);
 
@@ -131,8 +129,14 @@ class FW_Extension_WP_Shortcodes extends FW_Extension {
 				$atts, '', null
 			);
 
-			// 2. decode with aggressive, but only if we need it
-			foreach ($atts as $key => $value) {
+			$this->enqueue_wp_shortcode_static_real($atts);
+		}
+	}
+
+	public function enqueue_wp_shortcode_static_real($atts) {
+		// 2. decode with aggressive, but only if we need it
+		foreach ($atts as $key => $value) {
+			if (is_string($value)) {
 				if (! $this->have_to_decode_with_aggresive($value)) {
 					continue;
 				}
@@ -141,12 +145,25 @@ class FW_Extension_WP_Shortcodes extends FW_Extension {
 				fw_ext_shortcodes_enqueue_shortcodes_static(
 					$value
 				);
+			} else if (is_array($value)) {
+				/**
+				 * Skip whole recursive branch if it doesn't contain a shortocde.
+				 * That's a TREMENDOUS performance optimisation.
+				 */
+				$have_to_recur = $this->have_to_decode_with_aggresive(
+					json_encode($value)
+				);
+
+				if ($have_to_recur) {
+					$this->enqueue_wp_shortcode_static_real($value);
+				}
 			}
 		}
-
 	}
 
 	private function have_to_decode_with_aggresive($str) {
+		if (! is_string($str)) { return false; }
+
 		$has_coder_inside = strpos($str, '_fw_coder=') !== false;
 		$has_aggessive_coder = strpos($str, 'aggressive') !== false;
 		$has_wp_editor_shortcode = strpos(
