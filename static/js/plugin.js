@@ -418,7 +418,7 @@
 		});
 
 		modal.on('change:values', function () {
-			editor.fire('PostProcess');
+			editor.save();
 			editor.fire('change');
 		});
 
@@ -456,7 +456,7 @@
 		var modal = new fw.OptionsModal(options);
 
 		modal.on('change:values', function () {
-			editor.fire('PostProcess');
+			editor.save();
 			editor.fire('change');
 		});
 
