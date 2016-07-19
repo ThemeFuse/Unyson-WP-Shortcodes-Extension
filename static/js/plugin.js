@@ -75,6 +75,8 @@
 					editor
 				);
 
+				editor.fire('change');
+
 				return false;
 			}
 
@@ -85,6 +87,8 @@
 					editor
 				);
 
+				editor.fire('change');
+
 				return false;
 			}
 
@@ -94,11 +98,15 @@
 					$(currentElement),
 					editor
 				);
+
+				editor.fire('change');
 			} else if ($(currentElement).parents('[data-fw-shortcode-tag]').length) {
 				editShortcodeFor(
 					$(currentElement).closest('[data-fw-shortcode-tag]'),
 					editor
 				)
+
+				editor.fire('change');
 			}
 		});
 
@@ -409,6 +417,10 @@
 			values: oldData.modal.get('values')
 		});
 
+		modal.on('change:values', function () {
+			editor.fire('change');
+		})
+
 		getStorageFor(editor).add(newId, {
 			tag: oldData.tag,
 			id: newId,
@@ -431,11 +443,20 @@
 	function initializeShortcodeStorage (editor, tag, id, values) {
 		if (getStorageFor(editor).get(id)) { return; }
 
-		var modal = new fw.OptionsModal({
+		var options = {
 			options: dataFor(tag).options,
-			size: dataFor(tag).config.page_builder.popup_size,
-			values: dataFor(tag).default_values
-		});
+			size: dataFor(tag).config.page_builder.popup_size
+		};
+
+		if (! values) {
+			options['values'] = dataFor(tag).default_values;
+		}
+
+		var modal = new fw.OptionsModal(options);
+
+		modal.on('change:values', function () {
+			editor.fire('change');
+		})
 
 		if (values) {
 			modal.set('values', values);
