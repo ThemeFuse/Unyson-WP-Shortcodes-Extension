@@ -456,7 +456,7 @@
 
 		modal.on('change:values', function () {
 			editor.fire('change');
-		})
+		});
 
 		if (values) {
 			modal.set('values', values);

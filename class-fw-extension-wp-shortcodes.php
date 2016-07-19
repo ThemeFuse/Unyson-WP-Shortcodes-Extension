@@ -135,6 +135,17 @@ class FW_Extension_WP_Shortcodes extends FW_Extension {
 
 	public function enqueue_wp_shortcode_static_real($atts) {
 		// 2. decode with aggressive, but only if we need it
+
+		/**
+		 * Skip whole recursive branch if it doesn't contain a shortocde.
+		 * That's a TREMENDOUS performance optimisation.
+		 */
+		$have_to_recur = $this->have_to_decode_with_aggresive(
+			json_encode($atts)
+		);
+
+		if (! $have_to_recur) { return; }
+
 		foreach ($atts as $key => $value) {
 			if (is_string($value)) {
 				if (! $this->have_to_decode_with_aggresive($value)) {
@@ -146,17 +157,7 @@ class FW_Extension_WP_Shortcodes extends FW_Extension {
 					$value
 				);
 			} else if (is_array($value)) {
-				/**
-				 * Skip whole recursive branch if it doesn't contain a shortocde.
-				 * That's a TREMENDOUS performance optimisation.
-				 */
-				$have_to_recur = $this->have_to_decode_with_aggresive(
-					json_encode($value)
-				);
-
-				if ($have_to_recur) {
-					$this->enqueue_wp_shortcode_static_real($value);
-				}
+				$this->enqueue_wp_shortcode_static_real($value);
 			}
 		}
 	}
