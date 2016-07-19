@@ -117,6 +117,7 @@ class FW_Extension_WP_Shortcodes extends FW_Extension {
 	}
 
 	public function enqueue_wp_shortcode_static($shortcode) {
+        return;
 		/**
 		 * Try to enqueue static for shortcodes that may be in
 		 * some attribute for a Page Builder Shortcode.
