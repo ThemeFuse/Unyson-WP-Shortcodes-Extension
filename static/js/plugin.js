@@ -429,6 +429,7 @@
 		editor.execCommand("mceInsertContent", false, content);
 
 		initializeShortcodeStorage(editor, tag, id);
+		editor.fire('change');
 	}
 
 	function initializeShortcodeStorage (editor, tag, id, values) {
