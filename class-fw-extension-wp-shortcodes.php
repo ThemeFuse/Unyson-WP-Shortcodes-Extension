@@ -85,6 +85,22 @@ class FW_Extension_WP_Shortcodes extends FW_Extension {
 			'mce_css',
 			array($this, 'editor_styles')
 		);
+
+		add_action(
+			'fw_admin_enqueue_scripts:post',
+			array($this, 'enqueue_option_types_scripts')
+		);
+	}
+
+	/**
+	 * Enqueue option types statics.
+	 */
+	public function enqueue_option_types_scripts() {
+		wp_enqueue_style('fw-unycon');
+
+		if (function_exists('fw_ext_shortcodes_enqueue_shortcodes_admin_scripts')) {
+			fw_ext_shortcodes_enqueue_shortcodes_admin_scripts();
+		}
 	}
 
 	protected function add_frontend_hooks() {
