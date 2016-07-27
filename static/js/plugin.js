@@ -411,11 +411,11 @@
 		var newId = fw.randomMD5();
 		var oldData = getStorageFor(editor).get(id)
 
-		var modal = new fw.OptionsModal({
+		var modal = createModal({
 			options: oldData.modal.get('options'),
 			size: oldData.modal.get('size'),
 			values: oldData.modal.get('values')
-		});
+		}, oldData);
 
 		modal.on('change:values', function () {
 			editor.save();
@@ -453,7 +453,7 @@
 			options['values'] = dataFor(tag).default_values;
 		}
 
-		var modal = new fw.OptionsModal(options);
+		var modal = createModal(options, dataFor(tag));
 
 		modal.on('change:values', function () {
 			editor.save();
@@ -475,6 +475,50 @@
 		};
 
 		getStorageFor(editor).add(id, shortcodeData);
+	}
+
+	function createModal (options, shortcodeData) {
+		var eventData = {modalSettings: {buttons: []}};
+
+		fwEvents.trigger('fw:ext:wp-shortcodes:options-modal:settings', {
+			modal: null,
+			modalSettings: eventData.modalSettings,
+			shortcode: shortcodeData.tag
+		});
+
+		var modal = new fw.OptionsModal(options, eventData.modalSettings);
+
+		modal.on('open', function () {
+			triggerEvent('options-modal:open', modal, shortcodeData);
+		});
+
+		modal.on('render', function () {
+			triggerEvent('options-modal:render', modal, shortcodeData);
+		});
+
+		modal.on('close', function () {
+			triggerEvent('options-modal:close', modal, shortcodeData);
+		});
+
+		return modal;
+	}
+
+	function triggerEvent (name, modal, shortcodeData) {
+		fwEvents.trigger('fw:ext:wp-shortcodes:' + name, {
+			modal: modal,
+			shortcode: shortcodeData.tag,
+			/**
+			 * Act like Page Builder Simple Item, at least for now.
+			 * TODO: Refactor this in the future
+			 */
+			item: {
+				modal: modal,
+				type: 'simple',
+				shortcode: shortcodeData.tag,
+				options: shortcodeData.options,
+				values: modal.get('values')
+			}
+		});
 	}
 
 	function getStorageFor (editor) {
