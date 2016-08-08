@@ -435,6 +435,16 @@
 		var id = id || fw.randomMD5();
 
 		var content = getVisualElementHtml(tag, id);
+
+		var node, p;
+
+		if (node = editor.dom.getParent(editor.selection.getNode())) {
+			p = editor.dom.create('p');
+			editor.dom.insertAfter(p, node);
+			editor.selection.setCursorLocation(p, 0);
+			editor.nodeChanged();
+		}
+
 		editor.execCommand("mceInsertContent", false, content);
 
 		initializeShortcodeStorage(editor, tag, id);
