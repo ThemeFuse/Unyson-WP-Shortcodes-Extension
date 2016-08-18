@@ -21,3 +21,5 @@ $manifest = array(
 	)
 );
 
+$manifest['github_update'] = 'ThemeFuse/Unyson-WP-Shortcodes-Extension';
+
