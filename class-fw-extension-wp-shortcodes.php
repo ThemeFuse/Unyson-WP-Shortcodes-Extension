@@ -33,43 +33,6 @@ class FW_Extension_WP_Shortcodes extends FW_Extension {
 		return $this->default_shortcodes_list;
 	}
 
-	public function build_shortcodes_list() {
-		$shortcodes = array_values( fw_ext('shortcodes')->get_shortcodes() );
-
-		$shortcodes = array_map(
-			array($this, '_parse_single_shortcode'),
-			$shortcodes
-		);
-
-		return $shortcodes;
-	}
-
-	public function _parse_single_shortcode( $shortcode ) {
-		$result = array();
-
-		$icon = $shortcode->locate_URI('/static/img/page_builder.png');
-
-		if ($icon) {
-			$result['icon'] = $icon;
-		}
-
-		$result['options'] = $shortcode->get_options();
-		$result['config'] = $shortcode->get_config();
-		$result['tag'] = $shortcode->get_tag();
-
-		if ($result['options']) {
-			$result['default_values'] = fw_get_options_values_from_input(
-				$result['options'],
-				array()
-			);
-		}
-
-		$title = $shortcode->get_config('page_builder/title');
-		$result['title'] = $title ? $title : $result['tag'];
-
-		return $result;
-	}
-
 	protected function add_admin_hooks() {
 		add_filter(
 			'mce_buttons',

@@ -13,12 +13,10 @@ if (is_admin()) {
 
 	wp_localize_script(
 		'fw',
-		'fw_ext_wp_shortcodes_data',
+		'fw_ext_wp_shortcodes_localizations',
 		array(
-			'button_title' => __('Editor Shortcodes'),
+			'button_title' => __('Unyson Shortcodes'),
 			'default_shortcodes_list' => $eds->default_shortcodes_list(),
-			'shortcodes' => $eds->build_shortcodes_list()
 		)
 	);
-
 }

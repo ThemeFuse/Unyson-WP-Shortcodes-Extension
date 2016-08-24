@@ -1,4 +1,17 @@
 (function ($) {
+
+	/**
+	 * Init this plugin only in some cases.
+	 *
+	 * 1. There's a wp-editor with the below option on the page
+	 *      'shortcodes' => true
+	 *
+	 * 2. There's any non wp-editor tinymce on this page (like main post editor)
+	 */
+	if (! shouldInitWpShortcodes()) { return; }
+
+	fwUnysonShortcodesLoadData().then(refreshEachUnysonPanel);
+
 	tinymce.create('tinymce.plugins.unyson_shortcodes', {
 		init: initPlugin
 	});
@@ -8,12 +21,7 @@
 	////////////
 
 	function initPlugin (editor) {
-		var html = shortcodesHtmlFor(editor);
-
-		/**
-		 * Skip initialization if we don't have any HTML for this current editor
-		 */
-		if (! html) {
+		if (! editorHasUnysonButton(editor)) {
 			return;
 		}
 
@@ -25,7 +33,10 @@
 				role: 'application',
 				classes: 'fw-shortcodes-container',
 				autohide: true,
-				html: html,
+				html: function () {
+					if (! fwUnysonShortcodesData()) { return 'Please refresh panel.'; }
+					return shortcodesHtmlFor(editor);
+				},
 				onclick: function (e) {
 					var tag;
 
@@ -38,7 +49,7 @@
 					}
 
 					if (tag) {
-						tinyMCE.activeEditor.execCommand(
+						editor.execCommand(
 							"insertShortcode",
 							false,
 							{tag: tag}
@@ -49,7 +60,7 @@
 				}
 			},
 			onclick: fixPanelPosition,
-			tooltip: fw_ext_wp_shortcodes_data.button_title
+			tooltip: fw_ext_wp_shortcodes_localizations.button_title
 		});
 
 		editor.addCommand('insertShortcode', function (ui, params) {
@@ -203,8 +214,10 @@
 		});
 
 		function performReplacement (callback, content) {
+			if (! fwUnysonShortcodesData()) { return content; }
+
 			return _.reduce(
-				fw_ext_wp_shortcodes_data.shortcodes,
+				fwUnysonShortcodesData(),
 				function (currentContent, shortcode) {
 					return wp.shortcode.replace(
 						shortcode.tag,
@@ -215,6 +228,22 @@
 				content
 			);
 		}
+	}
+
+	function editorContainsUnysonShortcodes (editor) {
+		var content = editor.getContent();
+
+		var hasNewSyntax = content.indexOf('__fw_editor_shortcodes_id') !== -1;
+		var hasDeprecatedSyntax = content.indexOf('fw_shortcode_id') !== -1;
+
+		return hasNewSyntax || hasDeprecatedSyntax;
+	}
+
+	function shouldInitWpShortcodes () {
+		return _.some(
+			tinymce.get(),
+			editorHasUnysonButton
+		);
 	}
 
 	function replaceHtmlWithTags (editor, content) {
@@ -246,8 +275,10 @@
 	function formShortcodeTagFor (id, editor) {
 		var data = getStorageFor(editor).get(id);
 		if (! data) return;
+
 		var encoded = fwShortcodesAggressiveCoder.encode(data.modal.get('values'));
 		encoded['__fw_editor_shortcodes_id'] = id;
+
 		var encodedString = _.map(
 			encoded,
 			function (value, key) { return key + '="' + value + '"'; }
@@ -329,20 +360,10 @@
 	}
 
 	function fixPanelPosition (e) {
-		try {
-			var id = e.control.panel._id,
-				$panel = $('#' + id + '.mce-fw-shortcodes-container'),
-				oldPos = $panel.data('left');
-			if (typeof oldPos === 'undefined' ) {
-				oldPos = parseInt($panel.css('left'));
-				$panel.data('left', oldPos);
-			}
+		if (! e.control.panel) { return; }
 
-			$panel.css('left',(oldPos - 216)+'px');
-			$panel.css('height', '');
-		} catch (e) {
-			//sometime _id is undefined
-			return false;
+		if (e.control.panel.state.get('visible')) {
+			e.control.panel.hide(); e.control.panel.show();
 		}
 	}
 
@@ -367,11 +388,26 @@
 			return false;
 		}
 
-		return fw_ext_wp_shortcodes_data.default_shortcodes_list;
+		return fw_ext_wp_shortcodes_localizations.default_shortcodes_list;
+	}
+
+	function editorHasUnysonButton (editor) {
+		var $wpEditor = jQuery(editor.targetElm).closest(
+			'.fw-option-type-wp-editor'
+		);
+
+		var isWpEditor = $wpEditor.length > 0;
+
+		if (isWpEditor) {
+			if ($wpEditor.attr('data-fw-shortcodes-list')) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	function dataFor (shortcode) {
-
 		var toReturn = $.extend(
 			true,
 			{},
@@ -383,7 +419,7 @@
 				}
 			},
 			_.findWhere(
-				fw_ext_wp_shortcodes_data.shortcodes,
+				fwUnysonShortcodesData(),
 				{tag: shortcode}
 			)
 		);
@@ -531,6 +567,60 @@
 		});
 	}
 
+	function refreshEachUnysonPanel () {
+		tinymce.get().map(function (editor) {
+			// re-render editor visual elements only if current
+			// editor has an unyson shortcode in it
+			//
+			// there's no need to do this manipulation if editor has nothing
+			// to do with Unyson Shortcodes
+			if (editorContainsUnysonShortcodes(editor)) {
+				if (! editor.isHidden()) {
+					editor.hide(); editor.show();
+				}
+			}
+
+			// Render each Unyson Shortcodes Panel
+			// Find Button Class from the TinyMce classes tree
+			var unysonButtonClass = null;
+
+			tinymce.walk(
+				editor.theme.panel,
+
+				function (cl) {
+					if (
+						// TODO: probably make this check better
+						cl.$el.find(
+							'> button > i.mce-i-fw-shortcodes-button'
+						).length > 0
+					) {
+						unysonButtonClass = cl;
+					}
+				},
+
+				'_items'
+			);
+
+			if (! unysonButtonClass) { return; }
+
+			var panelWasVisible = false;
+
+			/**
+			 * Next call of unysonButtonClass.showPanel() will re-render the
+			 * panel correctly from `unysonButtonClass.settings.panel`.
+			 */
+			if (unysonButtonClass.panel) {
+				panelWasVisible = unysonButtonClass.panel.state.get('visible');
+				unysonButtonClass.panel.hide();
+				unysonButtonClass.panel = null;
+			}
+
+			if (panelWasVisible) {
+				unysonButtonClass.showPanel();
+			}
+		});
+	}
+
 	function getStorageFor (editor) {
 		window.fwEditorShortcodesStorage = window.fwEditorShortcodesStorage || {};
 
@@ -554,16 +644,6 @@
 				id
 			);
 		}
-	}
-
-	function deepObjectExtend(target, source) {
-		for (var prop in source)
-			if (prop in target)
-				deepObjectExtend(target[prop], source[prop]);
-			else
-				target[prop] = source[prop];
-
-		return target;
 	}
 })(jQuery);
 
