@@ -10,7 +10,7 @@
 	 */
 	if (! shouldInitWpShortcodes()) { return; }
 
-	fwUnysonShortcodesLoadData().then(refreshEachUnysonPanel);
+	fw.shortcodesLoadData().then(refreshEachUnysonPanel);
 
 	tinymce.create('tinymce.plugins.unyson_shortcodes', {
 		init: initPlugin
@@ -34,7 +34,7 @@
 				classes: 'fw-shortcodes-container',
 				autohide: true,
 				html: function () {
-					if (! fwUnysonShortcodesData()) { return 'Please refresh panel.'; }
+					if (! fw.unysonShortcodesData()) { return 'Please refresh panel.'; }
 					return shortcodesHtmlFor(editor);
 				},
 				onclick: function (e) {
@@ -143,10 +143,10 @@
 
 		function replaceTagWithHtml (shortcode) {
 			var data = dataFor(shortcode.tag);
-			var values = fwShortcodesAggressiveCoder.decode(shortcode.attrs.named);
+			var values = fw.shortcodesAggressiveCoder.decode(shortcode.attrs.named);
 			var id = values.__fw_editor_shortcodes_id;
 
-			if (! fwShortcodesAggressiveCoder.canDecode(shortcode.attrs.named)) {
+			if (! fw.shortcodesAggressiveCoder.canDecode(shortcode.attrs.named)) {
 				return false;
 			}
 
@@ -155,10 +155,10 @@
 
 		function initializeTag (shortcode) {
 			var data = dataFor(shortcode.tag);
-			var values = fwShortcodesAggressiveCoder.decode(shortcode.attrs.named);
+			var values = fw.shortcodesAggressiveCoder.decode(shortcode.attrs.named);
 			var id = values.__fw_editor_shortcodes_id;
 
-			if (! fwShortcodesAggressiveCoder.canDecode(shortcode.attrs.named)) {
+			if (! fw.shortcodesAggressiveCoder.canDecode(shortcode.attrs.named)) {
 				if (values.fw_shortcode_id) {
 					return renderDeprecatedSyntax(shortcode.tag, values.fw_shortcode_id);
 				}
@@ -214,10 +214,10 @@
 		});
 
 		function performReplacement (callback, content) {
-			if (! fwUnysonShortcodesData()) { return content; }
+			if (! fw.unysonShortcodesData()) { return content; }
 
 			return _.reduce(
-				fwUnysonShortcodesData(),
+				fw.unysonShortcodesData(),
 				function (currentContent, shortcode) {
 					return wp.shortcode.replace(
 						shortcode.tag,
@@ -276,7 +276,7 @@
 		var data = getStorageFor(editor).get(id);
 		if (! data) return;
 
-		var encoded = fwShortcodesAggressiveCoder.encode(data.modal.get('values'));
+		var encoded = fw.shortcodesAggressiveCoder.encode(data.modal.get('values'));
 		encoded['__fw_editor_shortcodes_id'] = id;
 
 		var encodedString = _.map(
@@ -419,7 +419,7 @@
 				}
 			},
 			_.findWhere(
-				fwUnysonShortcodesData(),
+				fw.unysonShortcodesData(),
 				{tag: shortcode}
 			)
 		);
