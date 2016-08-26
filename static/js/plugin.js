@@ -8,7 +8,7 @@
 	 *
 	 * 2. There's any non wp-editor tinymce on this page (like main post editor)
 	 */
-	// fixme: if (! shouldInitWpShortcodes()) { return; }
+	if (! shouldInitWpShortcodes()) { return; }
 
 	fw.shortcodesLoadData().then(refreshEachUnysonPanel);
 
@@ -22,7 +22,7 @@
 
 	function initPlugin (editor) {
 		if (! editorHasUnysonButton(editor)) {
-			// fixme: return;
+			return;
 		}
 
 		editor.addButton('unyson_shortcodes', {
@@ -402,9 +402,16 @@
 			if ($wpEditor.attr('data-fw-shortcodes-list')) {
 				return true;
 			}
+
+			return false;
 		}
 
-		return false;
+		/**
+		 * Any editor that is not an `wp-editor` option_type
+		 * is an editor that has Unyson Button by default, which may not be
+		 * the right way to go.
+		 */
+		return true;
 	}
 
 	function dataFor (shortcode) {
