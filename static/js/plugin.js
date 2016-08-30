@@ -536,7 +536,8 @@
 		fwEvents.trigger('fw:ext:wp-shortcodes:options-modal:settings', {
 			modal: null,
 			modalSettings: eventData.modalSettings,
-			shortcode: shortcodeData.tag
+			shortcode: shortcodeData.tag,
+			wp_shortcodes: true
 		});
 
 		var modal = new fw.OptionsModal(options, eventData.modalSettings);
@@ -570,7 +571,8 @@
 				shortcode: shortcodeData.tag,
 				options: shortcodeData.options,
 				values: modal.get('values')
-			}
+			},
+			wp_shortcodes: true
 		});
 	}
 
