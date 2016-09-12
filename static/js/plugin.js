@@ -184,7 +184,7 @@
 				/**
 				 * Get actual defaults if there's no value in storage
 				 */
-				var values = null;
+				var values = _.findWhere(fw.unysonShortcodesData(), {tag: tag}).default_values;
 			}
 
 			values.__fw_editor_shortcodes_id = id;
