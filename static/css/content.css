@@ -1,4 +1,4 @@
-.fw-component-bar{
+.fw-component-bar {
 	font-size: 14px;
 	padding: 10px 15px;
 	min-height: 35px;
@@ -52,6 +52,7 @@
 	margin-right: 9px;
 	display: inline-block;
 	vertical-align: middle;
+	max-width: 15px;
 }
 
 .fw-shortcode:hover .fw-item-buttons {

@@ -26,40 +26,59 @@
 		}
 
 		editor.addButton('unyson_shortcodes', {
-			type: 'panelbutton',
 			icon: 'fw-shortcodes-button',
-			panel: {
-				style: 'max-width: 450px;',
-				role: 'application',
-				classes: 'fw-shortcodes-container',
-				autohide: true,
-				html: function () {
-					if (! fw.unysonShortcodesData()) { return 'Please refresh panel.'; }
-					return shortcodesHtmlFor(editor);
-				},
-				onclick: function (e) {
-					var tag;
+			onclick: function () {
 
-					if ($(e.target).hasClass('fw-shortcode-item')) {
-						tag = $(e.target).attr('data-shortcode-tag');
-					} else if (editor.dom.getParent(e.target, '.fw-shortcode-item')) {
-						tag = $(editor.dom.getParent(e.target, '.fw-shortcode-item')).attr('data-shortcode-tag');
-					} else {
-						return false;
+				editor.windowManager.open({
+					title: fw_ext_wp_shortcodes_localizations.button_title,
+					classes: 'fw-shortcodes-window',
+					autofix: false,
+					body: [
+						{
+							type: 'textbox',
+							name: 'textbox',
+							label: false,
+							tooltip: 'Some nice tooltip to use',
+							value: 'default value',
+							hidden: true
+						},
+
+						{
+							type: 'container',
+							name: 'container',
+							label: false,
+							html: shortcodesHtmlFor(editor)
+						}
+					],
+
+					buttons: [],
+
+					onclick: function (e) {
+						var tag;
+
+						if ($(e.target).hasClass('fw-shortcode-item')) {
+							tag = $(e.target).attr('data-shortcode-tag');
+						} else if (editor.dom.getParent(e.target, '.fw-shortcode-item')) {
+							tag = $(editor.dom.getParent(e.target, '.fw-shortcode-item')).attr('data-shortcode-tag');
+						} else {
+							return false;
+						}
+
+						if (tag) {
+							editor.execCommand(
+								"insertShortcode",
+								false,
+								{tag: tag}
+							);
+						}
+
+						this.close();
 					}
 
-					if (tag) {
-						editor.execCommand(
-							"insertShortcode",
-							false,
-							{tag: tag}
-						);
-					}
+				});
 
-					this.hide();
-				}
 			},
-			onclick: fixPanelPosition,
+
 			tooltip: fw_ext_wp_shortcodes_localizations.button_title
 		});
 
@@ -322,13 +341,13 @@
 
 		if (! shortcodes) { return; }
 
-		return _.map(
+		return '<div class="fw-wp-shortcodes-item-wrapper">' + _.map(
 			shortcodes,
 			_.compose(
 				singleShortcodeHtml,
 				dataFor
 			)
-		).join("\n");
+		).join("\n") + '</div>';
 
 		function singleShortcodeHtml (shortcode) {
 			return '<div class="fw-shortcode-item" data-shortcode-tag="' + shortcode.tag + '">' +
@@ -360,11 +379,26 @@
 	}
 
 	function fixPanelPosition (e) {
+		console.log('fix position');
+
 		if (! e.control.panel) { return; }
 
-		if (e.control.panel.state.get('visible')) {
-			e.control.panel.hide(); e.control.panel.show();
-		}
+		// if (e.control.panel.state.get('visible')) {
+			// e.control.panel.hide(); e.control.panel.show();
+
+			var id = e.control.panel._id,
+				$panel = $('#' + id + '.mce-fw-shortcodes-container'),
+				oldPos = $panel.data('left');
+
+			if (typeof oldPos === 'undefined' ) {
+				oldPos = parseInt($panel.css('left'));
+				$panel.data('left', oldPos);
+			}
+
+			$panel.css('left',(oldPos - 216)+'px');
+			$panel.css('height', '');
+			console.log(oldPos - 216);
+		// }
 	}
 
 	/**
