@@ -203,7 +203,7 @@
 				/**
 				 * Get actual defaults if there's no value in storage
 				 */
-				var values = _.findWhere(fw.unysonShortcodesData(), {tag: tag}).default_values;
+				var values = _.findWhere(_.values(fw.unysonShortcodesData()), {tag: tag}).default_values;
 			}
 
 			values.__fw_editor_shortcodes_id = id;
@@ -236,7 +236,7 @@
 			if (! fw.unysonShortcodesData()) { return content; }
 
 			return _.reduce(
-				fw.unysonShortcodesData(),
+				_.values(fw.unysonShortcodesData()),
 				function (currentContent, shortcode) {
 					return wp.shortcode.replace(
 						shortcode.tag,
@@ -460,7 +460,7 @@
 				}
 			},
 			_.findWhere(
-				fw.unysonShortcodesData(),
+				_.values(fw.unysonShortcodesData()),
 				{tag: shortcode}
 			)
 		);
