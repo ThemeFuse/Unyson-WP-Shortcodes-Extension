@@ -10,7 +10,7 @@
 	 */
 	if (! shouldInitWpShortcodes()) { return; }
 
-	fw.shortcodesLoadData().then(refreshEachUnysonPanel);
+	fw.shortcodesLoadData();
 
 	tinymce.create('tinymce.plugins.unyson_shortcodes', {
 		init: initPlugin
@@ -607,60 +607,6 @@
 				values: modal.get('values')
 			},
 			wp_shortcodes: true
-		});
-	}
-
-	function refreshEachUnysonPanel () {
-		tinymce.get().map(function (editor) {
-			// re-render editor visual elements only if current
-			// editor has an unyson shortcode in it
-			//
-			// there's no need to do this manipulation if editor has nothing
-			// to do with Unyson Shortcodes
-			if (editorContainsUnysonShortcodes(editor)) {
-				if (! editor.isHidden()) {
-					editor.hide(); editor.show();
-				}
-			}
-
-			// Render each Unyson Shortcodes Panel
-			// Find Button Class from the TinyMce classes tree
-			var unysonButtonClass = null;
-
-			tinymce.walk(
-				editor.theme.panel,
-
-				function (cl) {
-					if (
-						// TODO: probably make this check better
-						cl.$el.find(
-							'> button > i.mce-i-fw-shortcodes-button'
-						).length > 0
-					) {
-						unysonButtonClass = cl;
-					}
-				},
-
-				'_items'
-			);
-
-			if (! unysonButtonClass) { return; }
-
-			var panelWasVisible = false;
-
-			/**
-			 * Next call of unysonButtonClass.showPanel() will re-render the
-			 * panel correctly from `unysonButtonClass.settings.panel`.
-			 */
-			if (unysonButtonClass.panel) {
-				panelWasVisible = unysonButtonClass.panel.state.get('visible');
-				unysonButtonClass.panel.hide();
-				unysonButtonClass.panel = null;
-			}
-
-			if (panelWasVisible) {
-				unysonButtonClass.showPanel();
-			}
 		});
 	}
 
