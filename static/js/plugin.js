@@ -10,7 +10,7 @@
 	 */
 	if (! shouldInitWpShortcodes()) { return; }
 
-	fw.shortcodesLoadData();
+	fw.shortcodesLoadData().then(refreshEachEditor);
 
 	tinymce.create('tinymce.plugins.unyson_shortcodes', {
 		init: initPlugin
@@ -228,7 +228,6 @@
 		editor.on('PostProcess', function (event) {
 			if (event.get) {
 				event.content = replaceHtmlWithTags(editor, event.content);
-				// console.log(event.content);
 			}
 		});
 
@@ -376,29 +375,6 @@
 		}
 
 		return iconHtml || '';
-	}
-
-	function fixPanelPosition (e) {
-		console.log('fix position');
-
-		if (! e.control.panel) { return; }
-
-		// if (e.control.panel.state.get('visible')) {
-			// e.control.panel.hide(); e.control.panel.show();
-
-			var id = e.control.panel._id,
-				$panel = $('#' + id + '.mce-fw-shortcodes-container'),
-				oldPos = $panel.data('left');
-
-			if (typeof oldPos === 'undefined' ) {
-				oldPos = parseInt($panel.css('left'));
-				$panel.data('left', oldPos);
-			}
-
-			$panel.css('left',(oldPos - 216)+'px');
-			$panel.css('height', '');
-			console.log(oldPos - 216);
-		// }
 	}
 
 	/**
@@ -633,6 +609,25 @@
 				id
 			);
 		}
+	}
+
+	function refreshEachEditor () {
+
+		tinymce.get().map(function (editor) {
+			// re-render editor visual elements only if current
+			// editor has an unyson shortcode in it
+			//
+			// there's no need to do this manipulation if editor has nothing
+			// to do with Unyson Shortcodes
+			if (editorContainsUnysonShortcodes(editor)) {
+
+				if (! editor.isHidden()) {
+					editor.hide(); editor.show();
+				}
+
+			}
+		});
+
 	}
 })(jQuery);
 
