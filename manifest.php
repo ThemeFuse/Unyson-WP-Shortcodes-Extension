@@ -8,7 +8,7 @@ $manifest = array(
 		'Lets you insert Unyson shortcodes inside any WordPress editor.',
 		'fw'
 	),
-	'version' => '1.0.3',
+	'version' => '1.0.4',
 	'display' => true,
 	'standalone' => true,
 
