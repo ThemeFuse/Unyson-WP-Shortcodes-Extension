@@ -249,6 +249,12 @@
 	}
 
 	function editorContainsUnysonShortcodes (editor) {
+		/**
+		 * Prevent error:
+		 * Cannot read property 'body' of undefined
+		 */
+		if (! editor.getDoc()) { return false; }
+
 		var content = editor.getContent();
 
 		var hasNewSyntax = content.indexOf('__fw_editor_shortcodes_id') !== -1;
