@@ -515,7 +515,7 @@
 
 		var options = {
 			options: dataFor(tag).options,
-			size: dataFor(tag).config.page_builder.popup_size
+			size: dataFor(tag).popup_size
 		};
 
 		if (! values) {
