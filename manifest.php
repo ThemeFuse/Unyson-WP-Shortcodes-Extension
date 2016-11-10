@@ -13,6 +13,9 @@ $manifest = array(
 	'version' => '1.0.4',
 	'display' => true,
 	'standalone' => true,
+	
+	'author' => 'ThemeFuse',
+	'author_uri' => 'http://themefuse.com/',
 
 	'requirements' => array(
 		'extensions' => array(
