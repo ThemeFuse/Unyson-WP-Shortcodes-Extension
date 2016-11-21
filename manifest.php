@@ -10,7 +10,7 @@ $manifest = array(
 	),
 	'uri' => 'http://manual.unyson.io/en/latest/extension/wp-shortcodes/index.html',
 	'github_repo' => 'https://github.com/ThemeFuse/Unyson-WP-Shortcodes-Extension',
-	'version' => '1.0.4',
+	'version' => '1.0.5',
 	'display' => true,
 	'standalone' => true,
 	
