@@ -27,6 +27,12 @@ class FW_Extension_WP_Shortcodes extends FW_Extension {
 			), array(
 				'section', 'column', 'row'
 			));
+			
+			sort( $this->default_shortcodes_list );
+
+			$this->default_shortcodes_list = apply_filters(
+				'fw:ext:wp-shortcodes:sort', $this->default_shortcodes_list
+			);
 
 		}
 
