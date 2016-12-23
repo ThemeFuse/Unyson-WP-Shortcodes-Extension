@@ -368,15 +368,17 @@
 		var iconHtml = null;
 		var shortcode = dataFor(tag);
 
-		if (shortcode.icon) {
+		var src = shortcode.icon || shortcode.image;
+
+		if (src) {
 			if (window.FwBuilderComponents) {
 				if (typeof FwBuilderComponents.ItemView.iconToHtml !== "undefined") {
-					iconHtml = FwBuilderComponents.ItemView.iconToHtml(shortcode.icon);
+					iconHtml = FwBuilderComponents.ItemView.iconToHtml(src);
 				}
 			}
 
 			if (! iconHtml) {
-				iconHtml = '<img src="' + shortcode.icon + '"/>';
+				iconHtml = '<img src="' + src + '"/>';
 			}
 		}
 
