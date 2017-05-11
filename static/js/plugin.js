@@ -608,7 +608,7 @@
 	}
 
 	function getStorageFor (editor) {
-		window.fwEditorShortcodesStorage = window.fwEditorShortcodesStorage || {};
+		editor.fwEditorShortcodesStorage = editor.fwEditorShortcodesStorage || {};
 
 		return {
 			add: add,
@@ -617,16 +617,16 @@
 		};
 
 		function get(id) {
-			return window.fwEditorShortcodesStorage[id];
+			return editor.fwEditorShortcodesStorage[id];
 		}
 
 		function add (id, data) {
-			window.fwEditorShortcodesStorage[id] = data;
+			editor.fwEditorShortcodesStorage[id] = data;
 		}
 
 		function remove (id) {
-			window.fwEditorShortcodesStorage = _.omit(
-				window.fwEditorShortcodesStorage,
+			editor.fwEditorShortcodesStorage = _.omit(
+				editor.fwEditorShortcodesStorage,
 				id
 			);
 		}
