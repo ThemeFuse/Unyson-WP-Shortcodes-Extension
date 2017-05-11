@@ -321,22 +321,22 @@
 		);
 
 		icon.children()
-			.addClass('mceItem mceNonEditable unselectable')
 			.attr('contenteditable', 'false')
 			.filter('span,i,em').html('&nbsp;');
+
 		icon = icon.html();
 
 		return '' +
-			'<p><span data-fw-shortcode-id="' + id + '" data-fw-shortcode-tag="' + tag + '" class="mceNonEditable mceItem fw-shortcode unselectable" contenteditable="false">' +
-				'<span class="mceItem fw-component-bar mceNonEditable unselectable" contenteditable="false">' +
+			'<p><span data-fw-shortcode-id="' + id + '" data-fw-shortcode-tag="' + tag + '" class="mceItem mce-preview-object fw-shortcode" contenteditable="false">' +
+				'<span class="fw-component-bar" contenteditable="false">' +
 					icon +
-					'<span class="mceItem mceNonEditable unselectable" contenteditable="false">' + shortcode.title + '</span>' +
-					'<span class="fw-item-buttons mceItem fw-component-controls mceNonEditable unselectable">' +
-						'<i class="mceItem mceNonEditable unselectable dashicons dashicons-admin-generic fw-item-edit">&nbsp;</i>' +
-						'<i class="mceItem mceNonEditable unselectable dashicons dashicons-admin-page fw-item-clone">&nbsp;</i>' +
-						'<i class="mceItem mceNonEditable unselectable dashicons dashicons-no fw-item-delete">&nbsp;</i>' +
+					'<span class="" contenteditable="false">' + shortcode.title + '</span>' +
+					'<span class="fw-item-buttons fw-component-controls ">' +
+						'<i class="dashicons dashicons-admin-generic fw-item-edit">&nbsp;</i>' +
+						'<i class="dashicons dashicons-admin-page fw-item-clone">&nbsp;</i>' +
+						'<i class="dashicons dashicons-no fw-item-delete">&nbsp;</i>' +
 					'</span>' +
-					'<span class="mceItem mceNonEditable fw-component-title unselectable fw-hide" style="display: none">3Nd0fL1N3Sh0rtC0d3</span>' +
+					'<span class="fw-component-title fw-hide" style="display: none">3Nd0fL1N3Sh0rtC0d3</span>' +
 				'</span>' +
 			'</span></p>';
 	}
