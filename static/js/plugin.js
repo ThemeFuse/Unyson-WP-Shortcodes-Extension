@@ -88,7 +88,11 @@
 
 		//disable drag&drop in firefox
 		editor.on('mousedown', function(e){
-			if ( $(e.target).hasClass('unselectable') ) {
+			if (
+				$(e.target).hasClass('fw-item-buttons')
+				||
+				$(e.target).closest('.fw-item-buttons').length > 0
+			) {
 				e.stopPropagation();
 				return false;
 			}
@@ -97,6 +101,15 @@
 		//add listners for content item
 		editor.on('click', function (e) {
 			var currentElement = e.target;
+
+			if ($(e.target).hasClass('fw-item-buttons')) {
+				return;
+				e.stopPropagation();
+			}
+
+			if ($(e.target).closest('.fw-item-buttons')) {
+				e.stopPropagation();
+			}
 
 			//delete item
 			if ($(currentElement).hasClass('fw-item-delete')) {
@@ -331,7 +344,7 @@
 				'<span class="fw-component-bar" contenteditable="false">' +
 					icon +
 					'<span class="" contenteditable="false">' + shortcode.title + '</span>' +
-					'<span class="fw-item-buttons fw-component-controls ">' +
+					'<span class="fw-item-buttons mceItem mceNonEditable fw-component-controls ">' +
 						'<i class="dashicons dashicons-admin-generic fw-item-edit">&nbsp;</i>' +
 						'<i class="dashicons dashicons-admin-page fw-item-clone">&nbsp;</i>' +
 						'<i class="dashicons dashicons-no fw-item-delete">&nbsp;</i>' +

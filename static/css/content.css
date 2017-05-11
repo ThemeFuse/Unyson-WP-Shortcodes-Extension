@@ -59,6 +59,8 @@
 	display: inline-block;
 	vertical-align: middle;
 	line-height: 24px;
+	z-index: 999999999;
+	position: relative;
 }
 
 .fw-item-buttons {
