@@ -368,6 +368,8 @@
 		).join("\n") + '</div>';
 
 		function singleShortcodeHtml (shortcode) {
+			if (! shortcode.tag) return ''
+
 			return '<div class="fw-shortcode-item" data-shortcode-tag="' + shortcode.tag + '">' +
 						'<div class="inner">' +
 							getShortcodeIcon(shortcode.tag) +
